@@ -107,6 +107,8 @@ Swagger UI 우측 상단:
 관리자 계정은 환경 변수로만 생성됩니다:
 - `ADMIN_EMAIL`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `ADMIN_FULL_NAME`
 
+앱 시작 시 관리자 계정이 없으면 자동으로 생성됩니다.
+
 ## 주요 엔드포인트
 
 ### 인증

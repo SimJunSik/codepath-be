@@ -145,7 +145,7 @@ python scripts/seed_data.py
 생성되는 테스트 계정:
 - **User**: `test@codepath.com` / `Test123!`
 
-관리자 계정은 환경 변수로만 생성됩니다:
+관리자 계정은 환경 변수로만 생성되며, 앱 시작 시 자동 부트스트랩됩니다:
 - `ADMIN_EMAIL`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `ADMIN_FULL_NAME`
 
 생성되는 문제:
