@@ -9,7 +9,7 @@ env:
   ECR_REPOSITORY: codepath-backend
   ECS_CLUSTER: codepath-cluster
   ECS_SERVICE: codepath-service
-  ECS_TASK_DEFINITION: backend/ecs-task-def.json
+  ECS_TASK_DEFINITION: ecs-task-def.json
   CONTAINER_NAME: codepath-backend
 
 jobs:
