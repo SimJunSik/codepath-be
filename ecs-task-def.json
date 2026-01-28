@@ -1,0 +1,45 @@
+{
+  "family": "codepath-backend",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "executionRoleArn": "arn:aws:iam::285750004415:role/codepath-ecs-task-exec-role",
+  "taskRoleArn": "arn:aws:iam::285750004415:role/codepath-ecs-task-role",
+  "containerDefinitions": [
+    {
+      "name": "codepath-backend",
+      "image": "285750004415.dkr.ecr.ap-northeast-2.amazonaws.com/codepath-backend:latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 8000,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        { "name": "ENVIRONMENT", "value": "production" },
+        { "name": "DEBUG", "value": "False" },
+        { "name": "AUTO_CREATE_DB", "value": "False" },
+        { "name": "CORS_ORIGINS", "value": "[\"https://codepath\"]" },
+        { "name": "OPENAI_MODEL", "value": "gpt-5-mini" },
+        { "name": "LLM_EXPLANATION_PASS_SCORE", "value": "90" },
+        { "name": "LLM_EXPLANATION_TIMEOUT_SECONDS", "value": "20" }
+      ],
+      "secrets": [
+        { "name": "DATABASE_URL", "valueFrom": "/codepath/backend/DATABASE_URL" },
+        { "name": "REDIS_URL", "valueFrom": "/codepath/backend/REDIS_URL" },
+        { "name": "SECRET_KEY", "valueFrom": "/codepath/backend/SECRET_KEY" },
+        { "name": "OPENAI_API_KEY", "valueFrom": "/codepath/backend/OPENAI_API_KEY" }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/codepath-backend",
+          "awslogs-region": "ap-northeast-2",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ]
+}
