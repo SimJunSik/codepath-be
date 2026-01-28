@@ -68,3 +68,27 @@ class UserResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class UserListItem(BaseModel):
+    """Admin user list item"""
+    id: uuid.UUID
+    email: str
+    username: str
+    full_name: Optional[str]
+    is_active: bool
+    is_verified: bool
+    role: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class UserListResponse(BaseModel):
+    """Paginated user list response"""
+    users: list[UserListItem]
+    total: int
+    page: int
+    page_size: int
+    total_pages: int

@@ -167,6 +167,88 @@ class ProblemService:
             created_at=problem.created_at
         )
 
+    async def list_problems_admin(
+        self,
+        page: int = 1,
+        page_size: int = 20,
+        difficulty: Optional[str] = None,
+        category: Optional[str] = None,
+        is_active: Optional[bool] = None
+    ):
+        query = select(Problem)
+        if difficulty:
+            query = query.where(Problem.difficulty == difficulty)
+        if category:
+            query = query.where(Problem.category == category)
+        if is_active is not None:
+            query = query.where(Problem.is_active == is_active)
+
+        count_query = select(func.count()).select_from(query.subquery())
+        result = await self.db.execute(count_query)
+        total = result.scalar() or 0
+
+        offset = (page - 1) * page_size
+        query = query.offset(offset).limit(page_size).order_by(Problem.created_at.desc())
+        result = await self.db.execute(query)
+        problems = result.scalars().all()
+
+        total_pages = math.ceil(total / page_size) if total > 0 else 0
+        return problems, total, total_pages
+
+    async def get_problem_admin(self, problem_id: str) -> Problem:
+        result = await self.db.execute(
+            select(Problem).where(Problem.id == problem_id)
+        )
+        problem = result.scalar_one_or_none()
+        if not problem:
+            raise NotFoundError("Problem not found")
+        return problem
+
+    async def update_problem_admin(self, problem_id: str, update_data) -> Problem:
+        problem = await self.get_problem_admin(problem_id)
+
+        data = update_data.model_dump(exclude_unset=True)
+        for key, value in data.items():
+            if key == "difficulty" and value is not None:
+                value = DifficultyLevel(value)
+            if key == "category" and value is not None:
+                value = ProblemCategory(value)
+            setattr(problem, key, value)
+
+        await self.db.commit()
+        await self.db.refresh(problem)
+        return problem
+
+    async def delete_problem_admin(self, problem_id: str) -> None:
+        problem = await self.get_problem_admin(problem_id)
+        problem.is_active = False
+        await self.db.commit()
+
+    async def import_problems_from_json(self, problems):
+        created = 0
+        updated = 0
+
+        for item in problems:
+            result = await self.db.execute(
+                select(Problem).where(Problem.slug == item.slug)
+            )
+            existing = result.scalar_one_or_none()
+
+            payload = item.model_dump()
+            payload["difficulty"] = DifficultyLevel(payload["difficulty"])
+            payload["category"] = ProblemCategory(payload["category"])
+
+            if existing:
+                for key, value in payload.items():
+                    setattr(existing, key, value)
+                updated += 1
+            else:
+                self.db.add(Problem(**payload))
+                created += 1
+
+        await self.db.commit()
+        return created, updated
+
     async def run_code(
         self,
         problem_id: str,

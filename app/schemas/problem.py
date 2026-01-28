@@ -61,6 +61,102 @@ class ProblemDetail(BaseModel):
         from_attributes = True
 
 
+class ProblemAdminListItem(BaseModel):
+    """Admin problem list item"""
+    id: uuid.UUID
+    title: str
+    slug: str
+    difficulty: str
+    category: str
+    is_active: bool
+    is_premium: bool
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class ProblemAdminListResponse(BaseModel):
+    """Paginated admin problem list response"""
+    problems: List[ProblemAdminListItem]
+    total: int
+    page: int
+    page_size: int
+    total_pages: int
+
+
+class ProblemAdminDetail(BaseModel):
+    """Admin problem detail response"""
+    id: uuid.UUID
+    title: str
+    slug: str
+    description: str
+    difficulty: str
+    category: str
+    starter_code: str
+    solution_code: Optional[str]
+    test_cases: List[Dict[str, Any]]
+    constraints: Optional[List[str]]
+    hints: Optional[List[str]]
+    time_complexity: Optional[str]
+    space_complexity: Optional[str]
+    is_active: bool
+    is_premium: bool
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class ProblemAdminUpdateRequest(BaseModel):
+    """Admin problem update request"""
+    title: Optional[str] = None
+    slug: Optional[str] = None
+    description: Optional[str] = None
+    difficulty: Optional[str] = None
+    category: Optional[str] = None
+    starter_code: Optional[str] = None
+    solution_code: Optional[str] = None
+    test_cases: Optional[List[Dict[str, Any]]] = None
+    constraints: Optional[List[str]] = None
+    hints: Optional[List[str]] = None
+    time_complexity: Optional[str] = None
+    space_complexity: Optional[str] = None
+    is_active: Optional[bool] = None
+    is_premium: Optional[bool] = None
+
+
+class ProblemImportItem(BaseModel):
+    """Problem import item (JSON)"""
+    title: str
+    slug: str
+    description: str
+    difficulty: str
+    category: str
+    starter_code: str
+    solution_code: Optional[str] = None
+    test_cases: List[Dict[str, Any]]
+    constraints: Optional[List[str]] = None
+    hints: Optional[List[str]] = None
+    time_complexity: Optional[str] = None
+    space_complexity: Optional[str] = None
+    is_active: Optional[bool] = True
+    is_premium: Optional[bool] = False
+
+
+class ProblemImportRequest(BaseModel):
+    """Problem import request"""
+    problems: List[ProblemImportItem]
+
+
+class ProblemImportResponse(BaseModel):
+    """Problem import response"""
+    created: int
+    updated: int
+
+
 class CodeRunRequest(BaseModel):
     """Code run request"""
     code: str = Field(..., description="Python code to run")
