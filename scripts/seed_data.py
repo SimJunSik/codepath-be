@@ -36,14 +36,6 @@ async def seed_database():
         # Create test users
         users = [
             User(
-                email="admin@codepath.com",
-                username="admin",
-                hashed_password=get_password_hash("Admin123!"),
-                full_name="Admin User",
-                role=UserRole.ADMIN,
-                is_verified=True
-            ),
-            User(
                 email="test@codepath.com",
                 username="testuser",
                 hashed_password=get_password_hash("Test123!"),
@@ -52,6 +44,23 @@ async def seed_database():
                 is_verified=True
             ),
         ]
+
+        admin_email = settings.ADMIN_EMAIL.strip()
+        admin_username = settings.ADMIN_USERNAME.strip()
+        admin_password = settings.ADMIN_PASSWORD.strip()
+        admin_full_name = settings.ADMIN_FULL_NAME.strip() or "Admin User"
+
+        if admin_email and admin_username and admin_password:
+            users.append(
+                User(
+                    email=admin_email,
+                    username=admin_username,
+                    hashed_password=get_password_hash(admin_password),
+                    full_name=admin_full_name,
+                    role=UserRole.ADMIN,
+                    is_verified=True
+                )
+            )
 
         session.add_all(users)
         await session.commit()
@@ -1994,7 +2003,10 @@ D.mro()의 순서는?""",
         print(f"Created {len(problems)} Python Deep Dive quizzes")
         print("\nDatabase seeded successfully!")
         print("\nTest Credentials:")
-        print("- Admin: admin@codepath.com / Admin123!")
+        if admin_email and admin_username and admin_password:
+            print(f"- Admin: {admin_email} / {admin_password}")
+        else:
+            print("- Admin: (not created) set ADMIN_EMAIL/ADMIN_USERNAME/ADMIN_PASSWORD")
         print("- User: test@codepath.com / Test123!")
 
     await engine.dispose()

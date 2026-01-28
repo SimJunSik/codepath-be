@@ -102,9 +102,10 @@ Swagger UI 우측 상단:
 
 | Email | Password | Role |
 |-------|----------|------|
-| admin@codepath.com | Admin123! | Admin |
 | test@codepath.com | Test123! | User |
-| john@example.com | John123! | User |
+
+관리자 계정은 환경 변수로만 생성됩니다:
+- `ADMIN_EMAIL`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `ADMIN_FULL_NAME`
 
 ## 주요 엔드포인트
 

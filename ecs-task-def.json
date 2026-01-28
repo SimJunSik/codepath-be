@@ -30,6 +30,10 @@
         { "name": "DATABASE_URL", "valueFrom": "/codepath/backend/DATABASE_URL" },
         { "name": "REDIS_URL", "valueFrom": "/codepath/backend/REDIS_URL" },
         { "name": "SECRET_KEY", "valueFrom": "/codepath/backend/SECRET_KEY" },
+        { "name": "ADMIN_EMAIL", "valueFrom": "/codepath/backend/ADMIN_EMAIL" },
+        { "name": "ADMIN_USERNAME", "valueFrom": "/codepath/backend/ADMIN_USERNAME" },
+        { "name": "ADMIN_FULL_NAME", "valueFrom": "/codepath/backend/ADMIN_FULL_NAME" },
+        { "name": "ADMIN_PASSWORD", "valueFrom": "/codepath/backend/ADMIN_PASSWORD" },
         { "name": "OPENAI_API_KEY", "valueFrom": "/codepath/backend/OPENAI_API_KEY" }
       ],
       "logConfiguration": {

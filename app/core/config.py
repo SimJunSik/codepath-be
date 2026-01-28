@@ -62,6 +62,12 @@ class Settings(BaseSettings):
     # Rate Limiting
     RATE_LIMIT_PER_MINUTE: int = 60
 
+    # Admin bootstrap (optional)
+    ADMIN_EMAIL: str = ""
+    ADMIN_USERNAME: str = ""
+    ADMIN_PASSWORD: str = ""
+    ADMIN_FULL_NAME: str = ""
+
     # LLM Evaluation
     OPENAI_API_KEY: str = ""
     OPENAI_MODEL: str = "gpt-5-mini"

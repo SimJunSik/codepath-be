@@ -143,9 +143,10 @@ python scripts/seed_data.py
 ```
 
 생성되는 테스트 계정:
-- **Admin**: `admin@codepath.com` / `Admin123!`
-- **User 1**: `test@codepath.com` / `Test123!`
-- **User 2**: `john@example.com` / `John123!`
+- **User**: `test@codepath.com` / `Test123!`
+
+관리자 계정은 환경 변수로만 생성됩니다:
+- `ADMIN_EMAIL`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `ADMIN_FULL_NAME`
 
 생성되는 문제:
 - Two Sum (Easy)
