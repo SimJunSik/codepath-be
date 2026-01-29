@@ -37,12 +37,9 @@ async def signup(
             detail=str(e)
         )
     except Exception as e:
-        import traceback
-        print(f"Signup error: {type(e).__name__}: {str(e)}")
-        traceback.print_exc()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"An error occurred during registration: {type(e).__name__}: {str(e)}"
+            detail="An error occurred during registration"
         )
 
 
