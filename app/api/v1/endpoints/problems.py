@@ -30,7 +30,6 @@ async def get_problems(
     difficulty: Optional[str] = Query(None, description="Filter by difficulty"),
     category: Optional[str] = Query(None, description="Filter by category"),
     db: AsyncSession = Depends(get_db),
-    current_user: UserResponse = Depends(get_current_active_user)
 ):
     """
     Get paginated list of problems
@@ -40,7 +39,7 @@ async def get_problems(
     - **difficulty**: Filter by difficulty (beginner, easy, medium, hard, expert)
     - **category**: Filter by category
 
-    Requires: Authentication
+    Public endpoint - No authentication required
     """
     try:
         problem_service = ProblemService(db)
