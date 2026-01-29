@@ -59,6 +59,11 @@ class Settings(BaseSettings):
     CODE_EXECUTION_TIMEOUT: int = 5
     CODE_EXECUTION_MAX_OUTPUT: int = 10000
 
+    # AWS Lambda Code Executor
+    USE_LAMBDA_EXECUTOR: bool = True
+    CODE_EXECUTOR_LAMBDA_NAME: str = "codepath-code-executor"
+    AWS_REGION: str = "ap-northeast-2"
+
     # Rate Limiting
     RATE_LIMIT_PER_MINUTE: int = 60
 

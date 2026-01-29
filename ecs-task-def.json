@@ -24,7 +24,10 @@
         { "name": "CORS_ORIGINS", "value": "[\"https://codepath.cloud\"]" },
         { "name": "OPENAI_MODEL", "value": "gpt-5-mini" },
         { "name": "LLM_EXPLANATION_PASS_SCORE", "value": "90" },
-        { "name": "LLM_EXPLANATION_TIMEOUT_SECONDS", "value": "20" }
+        { "name": "LLM_EXPLANATION_TIMEOUT_SECONDS", "value": "20" },
+        { "name": "USE_LAMBDA_EXECUTOR", "value": "True" },
+        { "name": "CODE_EXECUTOR_LAMBDA_NAME", "value": "codepath-code-executor" },
+        { "name": "AWS_REGION", "value": "ap-northeast-2" }
       ],
       "secrets": [
         { "name": "DATABASE_URL", "valueFrom": "/codepath/backend/DATABASE_URL" },
