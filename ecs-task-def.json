@@ -20,8 +20,8 @@
       "environment": [
         { "name": "ENVIRONMENT", "value": "production" },
         { "name": "DEBUG", "value": "False" },
-        { "name": "AUTO_CREATE_DB", "value": "False" },
-        { "name": "CORS_ORIGINS", "value": "[\"https://codepath\"]" },
+        { "name": "AUTO_CREATE_DB", "value": "True" },
+        { "name": "CORS_ORIGINS", "value": "[\"https://codepath.cloud\"]" },
         { "name": "OPENAI_MODEL", "value": "gpt-5-mini" },
         { "name": "LLM_EXPLANATION_PASS_SCORE", "value": "90" },
         { "name": "LLM_EXPLANATION_TIMEOUT_SECONDS", "value": "20" }
