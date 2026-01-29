@@ -2,6 +2,7 @@
 Problem API endpoints
 """
 from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
 
@@ -16,6 +17,7 @@ from app.schemas.problem import (
 )
 from app.schemas.auth import UserResponse
 from app.services.problem_service import ProblemService
+from app.services.rate_limiter import RateLimiter, RateLimitExceeded
 from app.api.v1.deps import get_current_active_user
 from app.core.exceptions import NotFoundError
 
@@ -138,9 +140,14 @@ async def submit_code(
     This endpoint creates a submission record and runs code against
     all test cases including hidden ones.
 
+    Rate limit: 10 seconds between submissions (LLM evaluation)
+
     Requires: Authentication
     """
     try:
+        # Check rate limit for LLM usage
+        await RateLimiter.check_and_record_llm_request(str(current_user.id))
+
         problem_service = ProblemService(db)
         result = await problem_service.submit_code(
             problem_id=problem_id,
@@ -148,6 +155,15 @@ async def submit_code(
             request=request
         )
         return result
+    except RateLimitExceeded as e:
+        return JSONResponse(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            content={
+                "detail": e.message,
+                "retry_after": e.retry_after
+            },
+            headers={"Retry-After": str(e.retry_after)}
+        )
     except NotFoundError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
