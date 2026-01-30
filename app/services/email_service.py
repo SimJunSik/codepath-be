@@ -1,9 +1,7 @@
 """
-Email service for sending verification emails via AWS SES
+Email service for sending verification emails via Resend
 """
-import boto3
-from botocore.exceptions import ClientError
-from typing import Optional
+import resend
 import logging
 
 from app.core.config import settings
@@ -12,14 +10,11 @@ logger = logging.getLogger(__name__)
 
 
 class EmailService:
-    """Email service using AWS SES"""
+    """Email service using Resend"""
 
     def __init__(self):
-        self.ses_client = boto3.client(
-            "ses",
-            region_name=settings.AWS_REGION
-        )
-        self.sender_email = settings.AWS_SES_SENDER_EMAIL
+        resend.api_key = settings.RESEND_API_KEY
+        self.sender_email = settings.RESEND_SENDER_EMAIL
 
     def _get_verification_email_html(self, code: str) -> str:
         """Generate HTML template for verification email"""
@@ -102,27 +97,9 @@ class EmailService:
         </html>
         """
 
-    def _get_verification_email_text(self, code: str) -> str:
-        """Generate plain text template for verification email"""
-        return f"""
-CodePath 이메일 인증
-
-안녕하세요! CodePath에 가입해 주셔서 감사합니다.
-
-아래 인증 코드를 입력하여 이메일 인증을 완료해 주세요.
-
-인증 코드: {code}
-
-이 코드는 5분 동안 유효합니다.
-본인이 요청하지 않은 경우 이 이메일을 무시하세요.
-
----
-이 이메일은 CodePath에서 자동 발송되었습니다.
-        """
-
     async def send_verification_code(self, email: str, code: str) -> bool:
         """
-        Send verification code email via AWS SES
+        Send verification code email via Resend
 
         Args:
             email: Recipient email address
@@ -132,35 +109,18 @@ CodePath 이메일 인증
             True if email sent successfully, False otherwise
         """
         try:
-            response = self.ses_client.send_email(
-                Source=self.sender_email,
-                Destination={
-                    "ToAddresses": [email]
-                },
-                Message={
-                    "Subject": {
-                        "Data": "[CodePath] 이메일 인증 코드",
-                        "Charset": "UTF-8"
-                    },
-                    "Body": {
-                        "Text": {
-                            "Data": self._get_verification_email_text(code),
-                            "Charset": "UTF-8"
-                        },
-                        "Html": {
-                            "Data": self._get_verification_email_html(code),
-                            "Charset": "UTF-8"
-                        }
-                    }
-                }
-            )
-            logger.info(f"Verification email sent to {email}, MessageId: {response['MessageId']}")
+            params = {
+                "from": self.sender_email,
+                "to": [email],
+                "subject": "[CodePath] 이메일 인증 코드",
+                "html": self._get_verification_email_html(code),
+            }
+
+            response = resend.Emails.send(params)
+            logger.info(f"Verification email sent to {email}, ID: {response.get('id')}")
             return True
-        except ClientError as e:
-            logger.error(f"Failed to send verification email to {email}: {e.response['Error']['Message']}")
-            return False
         except Exception as e:
-            logger.error(f"Unexpected error sending email to {email}: {str(e)}")
+            logger.error(f"Failed to send verification email to {email}: {str(e)}")
             return False
 
 
