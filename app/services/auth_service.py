@@ -180,6 +180,9 @@ class AuthService:
         # Delete verified email status from Redis
         await self.delete_email_verified(request.email)
 
+        # Send new user notification to admin
+        await email_service.send_new_user_notification(request.email, request.username)
+
         # Create tokens
         token_data = {"sub": str(user.id), "email": user.email}
         access_token = create_access_token(token_data)

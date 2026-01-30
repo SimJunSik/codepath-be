@@ -97,6 +97,43 @@ class EmailService:
         </html>
         """
 
+    async def send_new_user_notification(self, user_email: str, username: str) -> bool:
+        """
+        Send notification email when a new user signs up
+
+        Args:
+            user_email: New user's email address
+            username: New user's username
+
+        Returns:
+            True if email sent successfully, False otherwise
+        """
+        try:
+            html_content = f"""
+            <div style="font-family: sans-serif; padding: 20px;">
+                <h2 style="color: #6366f1;">새로운 사용자 가입 알림</h2>
+                <p>새로운 사용자가 CodePath에 가입했습니다.</p>
+                <ul>
+                    <li><strong>이메일:</strong> {user_email}</li>
+                    <li><strong>사용자명:</strong> {username}</li>
+                </ul>
+            </div>
+            """
+
+            params = {
+                "from": self.sender_email,
+                "to": ["wnstlr24.alarmcon@gmail.com"],
+                "subject": f"[CodePath] 새로운 사용자 가입: {username}",
+                "html": html_content,
+            }
+
+            response = resend.Emails.send(params)
+            logger.info(f"New user notification sent for {user_email}, ID: {response.get('id')}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to send new user notification: {str(e)}")
+            return False
+
     async def send_verification_code(self, email: str, code: str) -> bool:
         """
         Send verification code email via Resend
