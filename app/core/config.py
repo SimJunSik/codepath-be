@@ -64,6 +64,9 @@ class Settings(BaseSettings):
     CODE_EXECUTOR_LAMBDA_NAME: str = "codepath-code-executor"
     AWS_REGION: str = "ap-northeast-2"
 
+    # AWS SES Email
+    AWS_SES_SENDER_EMAIL: str = "noreply@codepath.cloud"
+
     # Rate Limiting
     RATE_LIMIT_PER_MINUTE: int = 60
 

@@ -92,3 +92,20 @@ class UserListResponse(BaseModel):
     page: int
     page_size: int
     total_pages: int
+
+
+class SendVerificationCodeRequest(BaseModel):
+    """Send verification code request (before signup)"""
+    email: EmailStr = Field(..., description="Email address to verify")
+
+
+class VerifyCodeRequest(BaseModel):
+    """Verify code request (before signup)"""
+    email: EmailStr = Field(..., description="Email address")
+    code: str = Field(..., min_length=6, max_length=6, description="6-digit verification code")
+
+
+class VerifyCodeResponse(BaseModel):
+    """Verify code response"""
+    message: str = Field(..., description="Response message")
+    verified: bool = Field(..., description="Whether email is verified")

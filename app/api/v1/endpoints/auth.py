@@ -5,7 +5,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
-from app.schemas.auth import SignupRequest, LoginRequest, TokenResponse, RefreshTokenRequest, UserResponse
+from app.schemas.auth import (
+    SignupRequest, LoginRequest, TokenResponse, RefreshTokenRequest,
+    UserResponse, SendVerificationCodeRequest, VerifyCodeRequest, VerifyCodeResponse
+)
 from app.services.auth_service import AuthService
 from app.api.v1.deps import get_current_active_user
 from app.core.exceptions import AuthenticationError, ConflictError
@@ -14,23 +17,23 @@ from app.core.exceptions import AuthenticationError, ConflictError
 router = APIRouter()
 
 
-@router.post("/signup", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-async def signup(
-    request: SignupRequest,
+@router.post("/send-verification-code")
+async def send_verification_code(
+    request: SendVerificationCodeRequest,
     db: AsyncSession = Depends(get_db)
 ):
     """
-    Register a new user
+    Send verification code to email (before signup)
 
-    - **email**: Valid email address
-    - **username**: Unique username (3-50 characters, alphanumeric + underscore)
-    - **password**: Strong password (min 8 chars, uppercase, lowercase, digit)
-    - **full_name**: Optional full name
+    - **email**: Email address to verify
+
+    A 6-digit verification code will be sent to the email address.
+    The code expires in 5 minutes.
     """
     try:
         auth_service = AuthService(db)
-        user = await auth_service.signup(request)
-        return user
+        result = await auth_service.send_verification_code(request.email)
+        return result
     except ConflictError as e:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -39,7 +42,73 @@ async def signup(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred during registration"
+            detail="인증 코드 발송 중 오류가 발생했습니다."
+        )
+
+
+@router.post("/verify-code", response_model=VerifyCodeResponse)
+async def verify_code(
+    request: VerifyCodeRequest,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Verify the code sent to email (before signup)
+
+    - **email**: Email address
+    - **code**: 6-digit verification code
+
+    Returns verification status. Once verified, you have 10 minutes to complete signup.
+    """
+    try:
+        auth_service = AuthService(db)
+        result = await auth_service.verify_code(request.email, request.code)
+        return result
+    except AuthenticationError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="인증 코드 검증 중 오류가 발생했습니다."
+        )
+
+
+@router.post("/signup", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
+async def signup(
+    request: SignupRequest,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Register a new user (email must be verified first)
+
+    - **email**: Verified email address
+    - **username**: Unique username (3-50 characters, alphanumeric + underscore)
+    - **password**: Strong password (min 8 chars, uppercase, lowercase, digit)
+    - **full_name**: Optional full name
+
+    Note: Email must be verified via /auth/verify-code before signup.
+    Returns access and refresh tokens upon successful registration.
+    """
+    try:
+        auth_service = AuthService(db)
+        tokens = await auth_service.signup(request)
+        return tokens
+    except AuthenticationError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except ConflictError as e:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(e)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="회원가입 중 오류가 발생했습니다."
         )
 
 
@@ -67,7 +136,7 @@ async def login(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred during login"
+            detail="로그인 중 오류가 발생했습니다."
         )
 
 
