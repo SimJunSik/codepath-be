@@ -208,7 +208,8 @@ def lambda_handler(event, context):
                     'input': test_input if not is_hidden else None,
                     'expected': expected_output if not is_hidden else None,
                     'actual': actual_output if not is_hidden else None,
-                    'error': None
+                    'error': None,
+                    'execution_time': 0
                 })
             else:
                 results.append({
@@ -217,7 +218,8 @@ def lambda_handler(event, context):
                     'input': test_input if not is_hidden else None,
                     'expected': expected_output if not is_hidden else None,
                     'actual': None,
-                    'error': exec_result['error']
+                    'error': exec_result['error'],
+                    'execution_time': 0
                 })
 
         return {

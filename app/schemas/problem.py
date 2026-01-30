@@ -167,11 +167,11 @@ class TestResult(BaseModel):
     """Individual test result"""
     test_id: int
     passed: bool
-    input: Dict[str, Any]
-    expected: Any
-    actual: Optional[Any]
-    error: Optional[str]
-    execution_time: Optional[int]  # milliseconds
+    input: Optional[Dict[str, Any]] = None
+    expected: Optional[Any] = None
+    actual: Optional[Any] = None
+    error: Optional[str] = None
+    execution_time: Optional[int] = None  # milliseconds
 
 
 class CodeRunResponse(BaseModel):
