@@ -22,16 +22,37 @@ class DifficultyLevel(str, enum.Enum):
 
 class ProblemCategory(str, enum.Enum):
     """Problem categories - Python Deep Dive"""
+    # Core Python internals
     GIL = "gil"
     CPYTHON = "cpython"
     MEMORY = "memory"
+
+    # Data structures
     DATA_STRUCTURE = "data_structure"
     COPY = "copy"
+    COLLECTIONS = "collections"
+
+    # Functions and control flow
     GENERATOR = "generator"
     DECORATOR = "decorator"
     CLOSURE = "closure"
+    FUNCTION = "function"
+    CONTROL_FLOW = "control_flow"
+
+    # OOP and concurrency
     CONCURRENCY = "concurrency"
     OOP = "oop"
+
+    # Basic Python concepts
+    STRING = "string"
+    BUILTIN = "builtin"
+    EXCEPTION = "exception"
+    IO = "io"
+    MODULE = "module"
+    UNPACKING = "unpacking"
+    SYNTAX = "syntax"
+    TRUTHINESS = "truthiness"
+    BEST_PRACTICE = "best_practice"
 
 
 class Problem(Base):
