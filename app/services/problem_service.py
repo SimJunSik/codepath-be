@@ -303,8 +303,13 @@ class ProblemService:
             existing = result.scalar_one_or_none()
 
             payload = item.model_dump(mode="json")
-            for k in ("difficulty", "category"):
-                payload[k] = payload[k].strip().lower()
+
+            # Convert string values to enum objects
+            difficulty_str = payload["difficulty"].strip().lower()
+            category_str = payload["category"].strip().lower()
+
+            payload["difficulty"] = DifficultyLevel(difficulty_str)
+            payload["category"] = ProblemCategory(category_str)
 
             if existing:
                 for key, value in payload.items():
