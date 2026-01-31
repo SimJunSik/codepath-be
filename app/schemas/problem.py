@@ -168,7 +168,12 @@ class ProblemImportResponse(BaseModel):
 
 class CodeRunRequest(BaseModel):
     """Code run request"""
-    code: str = Field(..., description="Python code to run")
+    code: str = Field(
+        ...,
+        description="Python code to run",
+        max_length=10000,
+        min_length=1
+    )
     language: str = Field(default="python", description="Programming language")
 
 
@@ -195,7 +200,12 @@ class CodeRunResponse(BaseModel):
 
 class CodeSubmitRequest(BaseModel):
     """Code submission request"""
-    code: str = Field(..., description="Python code to submit")
+    code: str = Field(
+        ...,
+        description="Python code to submit",
+        max_length=10000,
+        min_length=1
+    )
     language: str = Field(default="python", description="Programming language")
 
 
