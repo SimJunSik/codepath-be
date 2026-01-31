@@ -4,7 +4,15 @@ Problem related Pydantic schemas
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 from datetime import datetime
+from enum import Enum
 import uuid
+
+
+class SolveStatus(str, Enum):
+    """Problem solve status for a user"""
+    SOLVED = "solved"              # PASSED 상태의 Submission이 1개 이상 존재
+    ATTEMPTED = "attempted"        # Submission이 있지만 PASSED가 없음
+    NOT_ATTEMPTED = "not_attempted"  # Submission이 없음
 
 
 class ProblemListItem(BaseModel):
@@ -17,6 +25,7 @@ class ProblemListItem(BaseModel):
     total_submissions: int
     successful_submissions: int
     success_rate: float
+    solve_status: Optional[str] = None  # 로그인 시에만 반환
 
     class Config:
         from_attributes = True

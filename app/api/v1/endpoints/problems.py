@@ -13,12 +13,13 @@ from app.schemas.problem import (
     CodeRunRequest,
     CodeRunResponse,
     CodeSubmitRequest,
-    CodeSubmitResponse
+    CodeSubmitResponse,
+    SolveStatus
 )
 from app.schemas.auth import UserResponse
 from app.services.problem_service import ProblemService
 from app.services.rate_limiter import RateLimiter, RateLimitExceeded
-from app.api.v1.deps import get_current_active_user
+from app.api.v1.deps import get_current_active_user, get_current_user_optional
 from app.core.exceptions import NotFoundError
 
 
@@ -31,7 +32,12 @@ async def get_problems(
     page_size: int = Query(20, ge=1, le=100, description="Items per page"),
     difficulty: Optional[str] = Query(None, description="Filter by difficulty"),
     category: Optional[str] = Query(None, description="Filter by category"),
+    solve_status: Optional[str] = Query(
+        None,
+        description="Filter by solve status (solved, attempted, not_attempted). Requires authentication."
+    ),
     db: AsyncSession = Depends(get_db),
+    current_user: Optional[UserResponse] = Depends(get_current_user_optional),
 ):
     """
     Get paginated list of problems
@@ -40,18 +46,39 @@ async def get_problems(
     - **page_size**: Items per page (default: 20, max: 100)
     - **difficulty**: Filter by difficulty (beginner, easy, medium, hard, expert)
     - **category**: Filter by category
+    - **solve_status**: Filter by solve status (solved, attempted, not_attempted)
 
-    Public endpoint - No authentication required
+    Public endpoint - Authentication optional
+    - Without authentication: solve_status field will be null
+    - With authentication: solve_status field will show user's progress
     """
     try:
+        # Validate solve_status if provided
+        if solve_status and solve_status not in [s.value for s in SolveStatus]:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid solve_status. Must be one of: {[s.value for s in SolveStatus]}"
+            )
+
+        # solve_status filter requires authentication
+        if solve_status and not current_user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Authentication required for solve_status filter"
+            )
+
         problem_service = ProblemService(db)
         problems = await problem_service.get_problems(
             page=page,
             page_size=page_size,
             difficulty=difficulty,
-            category=category
+            category=category,
+            user_id=str(current_user.id) if current_user else None,
+            solve_status=solve_status
         )
         return problems
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

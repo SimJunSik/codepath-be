@@ -90,3 +90,33 @@ async def get_current_admin_user(
             detail="Admin access required"
         )
     return current_user
+
+
+# Optional security scheme (does not raise error if no token)
+optional_security = HTTPBearer(auto_error=False)
+
+
+async def get_current_user_optional(
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(optional_security),
+    db: AsyncSession = Depends(get_db)
+) -> Optional[UserResponse]:
+    """
+    Get current user if authenticated, otherwise return None
+
+    Args:
+        credentials: HTTP Authorization credentials (optional)
+        db: Database session
+
+    Returns:
+        Current user data or None if not authenticated
+    """
+    if credentials is None:
+        return None
+
+    try:
+        token = credentials.credentials
+        auth_service = AuthService(db)
+        user = await auth_service.get_current_user(token)
+        return user
+    except (AuthenticationError, Exception):
+        return None

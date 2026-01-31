@@ -3,9 +3,10 @@ Problem service for managing problems and submissions
 """
 from typing import Any, Dict, List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, and_
+from sqlalchemy import select, func, and_, exists, case, literal
 from datetime import datetime
 import math
+import uuid
 
 from app.models.problem import Problem, DifficultyLevel, ProblemCategory
 from app.models.submission import Submission, SubmissionStatus
@@ -17,7 +18,8 @@ from app.schemas.problem import (
     CodeRunResponse,
     CodeSubmitRequest,
     CodeSubmitResponse,
-    TestResult
+    TestResult,
+    SolveStatus
 )
 from app.core.exceptions import NotFoundError
 from app.services.code_execution_service import CodeExecutionService
@@ -58,7 +60,9 @@ class ProblemService:
         page: int = 1,
         page_size: int = 20,
         difficulty: Optional[str] = None,
-        category: Optional[str] = None
+        category: Optional[str] = None,
+        user_id: Optional[str] = None,
+        solve_status: Optional[str] = None
     ) -> ProblemListResponse:
         """
         Get paginated list of problems
@@ -68,11 +72,13 @@ class ProblemService:
             page_size: Number of items per page
             difficulty: Filter by difficulty level
             category: Filter by category
+            user_id: User ID for solve status calculation
+            solve_status: Filter by solve status (solved, attempted, not_attempted)
 
         Returns:
             Paginated problem list
         """
-        # Build query
+        # Build base query
         query = select(Problem).where(Problem.is_active == True)
 
         # Apply filters
@@ -81,8 +87,42 @@ class ProblemService:
         if category:
             query = query.where(Problem.category == category)
 
-        # Get total count
+        # Get total count (before solve_status filter for proper pagination)
         count_query = select(func.count()).select_from(query.subquery())
+
+        # If user_id provided and solve_status filter requested, we need to handle it
+        if user_id and solve_status:
+            user_uuid = uuid.UUID(user_id)
+
+            # Subqueries for solve status
+            has_passed = exists(
+                select(Submission.id).where(
+                    and_(
+                        Submission.problem_id == Problem.id,
+                        Submission.user_id == user_uuid,
+                        Submission.status == SubmissionStatus.PASSED
+                    )
+                )
+            )
+            has_any_submission = exists(
+                select(Submission.id).where(
+                    and_(
+                        Submission.problem_id == Problem.id,
+                        Submission.user_id == user_uuid
+                    )
+                )
+            )
+
+            if solve_status == SolveStatus.SOLVED.value:
+                query = query.where(has_passed)
+            elif solve_status == SolveStatus.ATTEMPTED.value:
+                query = query.where(and_(has_any_submission, ~has_passed))
+            elif solve_status == SolveStatus.NOT_ATTEMPTED.value:
+                query = query.where(~has_any_submission)
+
+            # Recalculate count with filter
+            count_query = select(func.count()).select_from(query.subquery())
+
         result = await self.db.execute(count_query)
         total = result.scalar() or 0
 
@@ -94,6 +134,32 @@ class ProblemService:
         result = await self.db.execute(query)
         problems = result.scalars().all()
 
+        # Calculate solve status for each problem if user is authenticated
+        solve_statuses: Dict[uuid.UUID, str] = {}
+        if user_id and problems:
+            user_uuid = uuid.UUID(user_id)
+            problem_ids = [p.id for p in problems]
+
+            # Get all submissions for these problems by this user
+            submissions_query = select(
+                Submission.problem_id,
+                func.bool_or(Submission.status == SubmissionStatus.PASSED).label('has_passed')
+            ).where(
+                and_(
+                    Submission.problem_id.in_(problem_ids),
+                    Submission.user_id == user_uuid
+                )
+            ).group_by(Submission.problem_id)
+
+            submissions_result = await self.db.execute(submissions_query)
+            submissions_data = submissions_result.all()
+
+            for row in submissions_data:
+                if row.has_passed:
+                    solve_statuses[row.problem_id] = SolveStatus.SOLVED.value
+                else:
+                    solve_statuses[row.problem_id] = SolveStatus.ATTEMPTED.value
+
         # Convert to response models
         problem_items = [
             ProblemListItem(
@@ -104,7 +170,8 @@ class ProblemService:
                 category=p.category.value,
                 total_submissions=p.total_submissions,
                 successful_submissions=p.successful_submissions,
-                success_rate=p.success_rate
+                success_rate=p.success_rate,
+                solve_status=solve_statuses.get(p.id, SolveStatus.NOT_ATTEMPTED.value) if user_id else None
             )
             for p in problems
         ]
