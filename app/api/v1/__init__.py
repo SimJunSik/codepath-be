@@ -2,7 +2,7 @@
 API v1 router configuration
 """
 from fastapi import APIRouter
-from app.api.v1.endpoints import auth, problems, dashboard, admin
+from app.api.v1.endpoints import auth, problems, dashboard, admin, migrations
 
 api_router = APIRouter()
 
@@ -11,3 +11,4 @@ api_router.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 api_router.include_router(problems.router, prefix="/problems", tags=["Problems"])
 api_router.include_router(dashboard.router, prefix="/dashboard", tags=["Dashboard"])
 api_router.include_router(admin.router, prefix="/admin", tags=["Admin"])
+api_router.include_router(migrations.router, prefix="/admin/migrations", tags=["Migrations"])
