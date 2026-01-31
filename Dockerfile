@@ -14,8 +14,8 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/* \
     && pip install uv
 
-# Copy dependency files
-COPY pyproject.toml uv.lock ./
+# Copy dependency files and README (required by hatchling)
+COPY pyproject.toml uv.lock README.md ./
 
 # Install Python dependencies using uv
 RUN uv sync --frozen --no-dev
