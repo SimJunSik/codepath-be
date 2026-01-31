@@ -83,6 +83,16 @@ class Settings(BaseSettings):
     LLM_EXPLANATION_PASS_SCORE: int = 90
     LLM_EXPLANATION_TIMEOUT_SECONDS: int = 20
 
+    # Portone Payment
+    PORTONE_API_KEY: str = ""
+    PORTONE_API_SECRET: str = ""
+    PORTONE_STORE_ID: str = ""  # Portone 가맹점 식별코드
+
+    # Subscription Plans (configurable pricing)
+    PREMIUM_PLAN_PRICE: int = 100  # KRW (테스트용 100원, 나중에 9900원으로 변경)
+    PREMIUM_PLAN_NAME: str = "프리미엄"
+    PREMIUM_PLAN_DESCRIPTION: str = "모든 문제 접근 + AI 상세 해설"
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

@@ -171,7 +171,7 @@ class CodeRunRequest(BaseModel):
     code: str = Field(
         ...,
         description="Python code to run",
-        max_length=10000,
+        max_length=5000,
         min_length=1
     )
     language: str = Field(default="python", description="Programming language")
@@ -203,7 +203,7 @@ class CodeSubmitRequest(BaseModel):
     code: str = Field(
         ...,
         description="Python code to submit",
-        max_length=10000,
+        max_length=5000,
         min_length=1
     )
     language: str = Field(default="python", description="Programming language")
