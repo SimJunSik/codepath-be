@@ -301,7 +301,7 @@ class ProblemService:
             )
             existing = result.scalar_one_or_none()
 
-            payload = item.model_dump()
+            payload = item.model_dump(use_enum_values=True)
 
             if existing:
                 for key, value in payload.items():
