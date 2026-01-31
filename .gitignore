@@ -25,7 +25,8 @@ MANIFEST
 venv/
 env/
 ENV/
-.venv
+.venv/
+.python-version
 
 # IDEs
 .vscode/
