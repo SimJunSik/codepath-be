@@ -1,6 +1,7 @@
 """
 Problem service for managing problems and submissions
 """
+import json
 from typing import Any, Dict, List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, and_, exists, case, literal
@@ -301,7 +302,9 @@ class ProblemService:
             )
             existing = result.scalar_one_or_none()
 
-            payload = item.model_dump(use_enum_values=True)
+            payload = item.model_dump(mode="json")
+            for k in ("difficulty", "category"):
+                payload[k] = payload[k].strip().lower()
 
             if existing:
                 for key, value in payload.items():
