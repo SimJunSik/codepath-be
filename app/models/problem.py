@@ -22,6 +22,9 @@ class DifficultyLevel(str, enum.Enum):
 
 class ProblemCategory(str, enum.Enum):
     """Problem categories - Python Deep Dive"""
+    # Beginner basics
+    BASICS = "basics"
+
     # Core Python internals
     GIL = "gil"
     CPYTHON = "cpython"
