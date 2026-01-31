@@ -7,6 +7,7 @@ from sqlalchemy import text
 
 from app.core.database import get_db
 from app.api.v1.deps import get_current_admin_user
+from app.models.problem import ProblemCategory, DifficultyLevel
 
 router = APIRouter()
 
@@ -33,11 +34,8 @@ async def add_missing_enum_values(
     ))
     existing_categories = {row[0] for row in result.fetchall()}
 
-    category_values = [
-        'BASICS', 'COLLECTIONS', 'FUNCTION', 'CONTROL_FLOW',
-        'STRING', 'BUILTIN', 'EXCEPTION', 'IO', 'MODULE',
-        'UNPACKING', 'SYNTAX', 'TRUTHINESS', 'BEST_PRACTICE'
-    ]
+    # Get all enum values from ProblemCategory
+    category_values = [member.name for member in ProblemCategory]
 
     for value in category_values:
         if value not in existing_categories:
@@ -46,7 +44,7 @@ async def add_missing_enum_values(
         else:
             results["existing_categories"].append(value)
 
-    # Check and add DifficultyLevel values (should already exist)
+    # Check and add DifficultyLevel values
     result = await db.execute(text(
         "SELECT enumlabel FROM pg_enum e "
         "JOIN pg_type t ON e.enumtypid = t.oid "
@@ -54,7 +52,8 @@ async def add_missing_enum_values(
     ))
     existing_difficulties = {row[0] for row in result.fetchall()}
 
-    difficulty_values = ['BEGINNER', 'EASY', 'MEDIUM', 'HARD', 'EXPERT']
+    # Get all enum values from DifficultyLevel
+    difficulty_values = [member.name for member in DifficultyLevel]
 
     for value in difficulty_values:
         if value not in existing_difficulties:
