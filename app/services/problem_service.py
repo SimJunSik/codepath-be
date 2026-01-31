@@ -302,8 +302,6 @@ class ProblemService:
             existing = result.scalar_one_or_none()
 
             payload = item.model_dump()
-            payload["difficulty"] = DifficultyLevel(payload["difficulty"])
-            payload["category"] = ProblemCategory(payload["category"])
 
             if existing:
                 for key, value in payload.items():
