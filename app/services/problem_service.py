@@ -172,7 +172,8 @@ class ProblemService:
                 total_submissions=p.total_submissions,
                 successful_submissions=p.successful_submissions,
                 success_rate=p.success_rate,
-                solve_status=solve_statuses.get(p.id, SolveStatus.NOT_ATTEMPTED.value) if user_id else None
+                solve_status=solve_statuses.get(p.id, SolveStatus.NOT_ATTEMPTED.value) if user_id else None,
+                is_premium=p.is_premium
             )
             for p in problems
         ]
@@ -232,6 +233,7 @@ class ProblemService:
             total_submissions=problem.total_submissions,
             successful_submissions=problem.successful_submissions,
             success_rate=problem.success_rate,
+            is_premium=problem.is_premium,
             created_at=problem.created_at
         )
 

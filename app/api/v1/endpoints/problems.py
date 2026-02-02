@@ -18,9 +18,11 @@ from app.schemas.problem import (
 )
 from app.schemas.auth import UserResponse
 from app.services.problem_service import ProblemService
+from app.services.payment_service import PaymentService
 from app.services.rate_limiter import RateLimiter, RateLimitExceeded
 from app.api.v1.deps import get_current_active_user, get_current_user_optional
 from app.core.exceptions import NotFoundError
+from app.models.subscription import SubscriptionPlan
 
 
 router = APIRouter()
@@ -98,11 +100,27 @@ async def get_problem(
     - **problem_id**: Problem UUID
 
     Requires: Authentication
+    Premium problems require an active premium subscription.
     """
     try:
         problem_service = ProblemService(db)
         problem = await problem_service.get_problem_by_id(problem_id)
+
+        # 프리미엄 문제인 경우 구독 확인
+        if problem.is_premium:
+            payment_service = PaymentService(db)
+            subscription = await payment_service.get_user_subscription(str(current_user.id))
+
+            # 구독이 없거나 무료 플랜인 경우 접근 거부
+            if not subscription or subscription.plan == SubscriptionPlan.FREE:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="이 문제는 프리미엄 구독이 필요합니다."
+                )
+
         return problem
+    except HTTPException:
+        raise
     except NotFoundError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

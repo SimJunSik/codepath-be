@@ -26,6 +26,7 @@ class ProblemListItem(BaseModel):
     successful_submissions: int
     success_rate: float
     solve_status: Optional[str] = None  # 로그인 시에만 반환
+    is_premium: bool = False  # 구독 필요 여부
 
     class Config:
         from_attributes = True
@@ -64,6 +65,7 @@ class ProblemDetail(BaseModel):
     total_submissions: int
     successful_submissions: int
     success_rate: float
+    is_premium: bool = False  # 구독 필요 여부
     created_at: datetime
 
     class Config:
